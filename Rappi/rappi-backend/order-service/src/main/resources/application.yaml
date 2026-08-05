@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: order-service
+
+  # PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/rappi
+    username: rappi
+    password: rappi123
+    driver-class-name: org.postgresql.Driver
+
+  # JPA
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  # Kafka
+  kafka:
+    bootstrap-servers: localhost:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      group-id: order-service-group
+      auto-offset-reset: earliest
+
+server:
+  port: 8081
