@@ -37,6 +37,7 @@ Every system follows the same structure — mirroring a real interview:
    - Critical flows (sequence diagrams)
    - Failure scenarios
    - Scaling bottlenecks
+   - Authentication
 
 5. Diagrams
    - Architecture diagram (Excalidraw)
