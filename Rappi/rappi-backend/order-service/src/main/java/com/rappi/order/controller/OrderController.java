@@ -23,11 +23,17 @@ public class OrderController {
   @PostMapping
   public ResponseEntity<Order> placeOrder(@RequestBody PlaceOrderRequest request) {
     log.info("Received order request from customer: {}", request.customerId());
+
+    var items = request.items().stream()
+            .map(i -> new OrderService.CartItemInput(
+                    i.menuItemId(), i.quantity(), i.clientPrice()))
+            .toList();
+
     Order order = orderService.placeOrder(
             request.customerId(),
             request.restaurantId(),
             request.deliveryAddress(),
-            request.total(),
+            items,
             request.idempotencyKey()
     );
     return ResponseEntity.status(HttpStatus.CREATED).body(order);

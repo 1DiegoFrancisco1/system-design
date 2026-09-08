@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.rappi.grpc.cart";
+option java_outer_classname = "CartValidationProto";
+
+service CartValidationService {
+  rpc ValidateCart (ValidateCartRequest) returns (ValidateCartResponse);
+}
+
+message ValidateCartRequest {
+  string restaurant_id = 1;
+  repeated CartItem items = 2;
+}
+
+message CartItem {
+  string menu_item_id = 1;
+  int32 quantity = 2;
+  string client_price = 3;
+}
+
+message ValidateCartResponse {
+  bool valid = 1;
+  string authoritative_total = 2;
+  repeated ValidationError errors = 3;
+}
+
+message ValidationError {
+  string menu_item_id = 1;
+  string reason = 2;
+}
