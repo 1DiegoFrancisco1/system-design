@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: driver-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/rappi
+    username: rappi
+    password: rappi123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  # NEW — Redis connection
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: driver-service-group
+      auto-offset-reset: earliest
+
+server:
+  port: 8083
