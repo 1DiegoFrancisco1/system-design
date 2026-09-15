@@ -51,4 +51,13 @@ public class DriverController {
   public ResponseEntity<List<Driver>> getAvailableDrivers() {
     return ResponseEntity.ok(driverService.getAvailableDrivers());
   }
+
+  // Driver sends a GPS location PING
+  @PostMapping("/{driverId}/location")
+  public ResponseEntity<Void> updateLocation(
+          @PathVariable UUID driverId,
+          @RequestBody LocationPingRequest request) {
+    driverService.updateLocation(driverId, request.lng(), request.lat());
+    return ResponseEntity.ok().build();
+  }
 }

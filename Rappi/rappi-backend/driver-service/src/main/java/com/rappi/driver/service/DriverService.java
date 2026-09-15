@@ -2,6 +2,7 @@ package com.rappi.driver.service;
 
 import com.rappi.driver.model.Driver;
 import com.rappi.driver.model.DriverStatus;
+import com.rappi.driver.redis.DriverLocationService;
 import com.rappi.driver.repository.DriverRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class DriverService {
 
   private final DriverRepository driverRepository;
+  private final DriverLocationService locationService;
 
   // ── Register a new driver (starts OFFLINE) ─────────
   @Transactional
@@ -44,7 +46,7 @@ public class DriverService {
     var saved = driverRepository.save(driver);
     log.info("Driver {} started shift → AVAILABLE", driverId);
 
-    // TODO (Redis slice): SADD to available_drivers set
+    locationService.markAvailable(driverId); // Redis: SADD available_drivers
     return saved;
   }
 
@@ -61,7 +63,7 @@ public class DriverService {
     var saved = driverRepository.save(driver);
     log.info("Driver {} ended shift → OFFLINE", driverId);
 
-    // TODO (Redis slice): SREM from available_drivers set + remove from GEO
+    locationService.markUnavailable(driverId); // Redis: SREM available_drivers
     return saved;
   }
 
@@ -77,5 +79,11 @@ public class DriverService {
   private Driver getDriverOrThrow(UUID driverId) {
     return driverRepository.findById(driverId)
             .orElseThrow(() -> new RuntimeException("Driver not found: " + driverId));
+  }
+
+  // Driver location ping -> straight to Redis GEO
+  public void updateLocation(UUID driverId, double lng, double lat) {
+    // The durable driver record in Postgres doesn't change on every GPS ping.
+    locationService.updateLocation(driverId, lng, lat);
   }
 }
