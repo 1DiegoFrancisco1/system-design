@@ -25,7 +25,9 @@ public class RestaurantController {
           @RequestBody CreateRestaurantRequest request) {
     Restaurant restaurant = restaurantService.createRestaurant(
             request.name(),
-            request.address()
+            request.address(),
+            request.latitude(),
+            request.longitude()
     );
     return ResponseEntity.status(HttpStatus.CREATED).body(restaurant);
   }

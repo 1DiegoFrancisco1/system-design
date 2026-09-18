@@ -18,11 +18,13 @@ public class OrderEventProducer {
   private static final String ORDER_ACCEPTED = "order.accepted";
   private static final String ORDER_REJECTED = "order.rejected";
 
-  public void publishOrderAccepted(UUID orderId, UUID restaurantId) {
+  public void publishOrderAccepted(UUID orderId, UUID restaurantId, double lat, double lng) {
     var event = OrderAcceptedEvent.builder()
             .orderId(orderId)
             .restaurantId(restaurantId)
             .decision("ACCEPTED")
+            .pickupLat(lat)
+            .pickupLng(lng)
             .build();
     kafkaTemplate.send(ORDER_ACCEPTED, orderId.toString(), event);
     log.info("Published order.accepted for order: {}", orderId);

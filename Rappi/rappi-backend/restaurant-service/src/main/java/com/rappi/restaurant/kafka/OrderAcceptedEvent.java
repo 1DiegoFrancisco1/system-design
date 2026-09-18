@@ -17,4 +17,6 @@ public class OrderAcceptedEvent {
   private UUID restaurantId;
   private String decision;   // "ACCEPTED" or "REJECTED"
   private String reason;     // reason if rejected
+  private double pickupLat;
+  private double pickupLng;
 }

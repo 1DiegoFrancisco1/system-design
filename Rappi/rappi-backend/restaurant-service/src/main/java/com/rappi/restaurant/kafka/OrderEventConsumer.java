@@ -1,6 +1,7 @@
 package com.rappi.restaurant.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rappi.restaurant.model.Restaurant;
 import com.rappi.restaurant.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,15 +28,16 @@ public class OrderEventConsumer {
 
       OrderEvent order = objectMapper.readValue(message, OrderEvent.class);
 
-      // Check if the restaurant is open and can accept the order
-      boolean canAccept = restaurantService.isRestaurantOpen(order.getRestaurantId());
+      Restaurant restaurant = restaurantService.getRestaurant(order.getRestaurantId());
 
-      if (canAccept) {
+      if (restaurant.isOpen()) {
         log.info("Restaurant {} accepting order {}",
                 order.getRestaurantId(), order.getOrderId());
         orderEventProducer.publishOrderAccepted(
                 order.getOrderId(),
-                order.getRestaurantId()
+                order.getRestaurantId(),
+                restaurant.getLatitude(),
+                restaurant.getLongitude()
         );
       } else {
         log.info("Restaurant {} rejecting order {} (closed)",

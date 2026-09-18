@@ -22,10 +22,12 @@ public class RestaurantService {
 
   // ── Create a restaurant ────────────────────────────
   @Transactional
-  public Restaurant createRestaurant(String name, String address) {
+  public Restaurant createRestaurant(String name, String address, double latitude, double longitude) {
     var restaurant = Restaurant.builder()
             .name(name)
             .address(address)
+            .latitude(latitude)
+            .longitude(longitude)
             .open(true)
             .build();
     var saved = restaurantRepository.save(restaurant);
@@ -89,5 +91,11 @@ public class RestaurantService {
     return restaurantRepository.findById(restaurantId)
             .map(Restaurant::isOpen)
             .orElse(false);
+  }
+
+  // Get a restaurant by id
+  public Restaurant getRestaurant(UUID restaurantId) {
+    return restaurantRepository.findById(restaurantId)
+            .orElseThrow(() -> new RuntimeException("Restaurant not found: " + restaurantId));
   }
 }

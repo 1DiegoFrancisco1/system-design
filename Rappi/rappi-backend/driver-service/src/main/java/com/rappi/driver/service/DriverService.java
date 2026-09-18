@@ -86,4 +86,15 @@ public class DriverService {
     // The durable driver record in Postgres doesn't change on every GPS ping.
     locationService.updateLocation(driverId, lng, lat);
   }
+
+  // Assign driver to an order: AVAILABLE → ON_DELIVERY
+  @Transactional
+  public Driver assignToOrder(UUID driverId, UUID orderId) {
+    var driver = getDriverOrThrow(driverId);
+    driver.setStatus(DriverStatus.ON_DELIVERY);
+    driver.setCurrentOrderId(orderId);
+    var saved = driverRepository.save(driver);
+    log.info("Driver {} assigned to order {} → ON_DELIVERY", driverId, orderId);
+    return saved;
+  }
 }

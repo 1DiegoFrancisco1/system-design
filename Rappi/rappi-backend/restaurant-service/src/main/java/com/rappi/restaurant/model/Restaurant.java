@@ -29,6 +29,13 @@ public class Restaurant {
   @Column(nullable = false)
   private String address;
 
+  // Coordinates - needed so we can find nearby drivers at assignment time
+  @Column(nullable = false)
+  private double latitude;
+
+  @Column(nullable = false)
+  private double longitude;
+
   // Is the restaurant currently accepting orders?
   @Column(nullable = false)
   private boolean open;
