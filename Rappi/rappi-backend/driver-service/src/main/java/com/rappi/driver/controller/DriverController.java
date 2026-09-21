@@ -60,4 +60,10 @@ public class DriverController {
     driverService.updateLocation(driverId, request.lng(), request.lat());
     return ResponseEntity.ok().build();
   }
+
+  // Driver marks their current delivery complete
+  @PostMapping("/{driverId}/complete-delivery")
+  public ResponseEntity<Driver> completeDelivery(@PathVariable UUID driverId) {
+    return ResponseEntity.ok(driverService.completeDelivery(driverId));
+  }
 }

@@ -1,5 +1,6 @@
 package com.rappi.driver.service;
 
+import com.rappi.driver.kafka.DriverEventProducer;
 import com.rappi.driver.model.Driver;
 import com.rappi.driver.model.DriverStatus;
 import com.rappi.driver.redis.DriverLocationService;
@@ -19,6 +20,7 @@ public class DriverService {
 
   private final DriverRepository driverRepository;
   private final DriverLocationService locationService;
+  private final DriverEventProducer driverEventProducer;
 
   // ── Register a new driver (starts OFFLINE) ─────────
   @Transactional
@@ -95,6 +97,29 @@ public class DriverService {
     driver.setCurrentOrderId(orderId);
     var saved = driverRepository.save(driver);
     log.info("Driver {} assigned to order {} → ON_DELIVERY", driverId, orderId);
+    return saved;
+  }
+
+  // Complete delivery: ON_DELIVERY -> AVAILABLE
+  @Transactional
+  public Driver completeDelivery(UUID driverId) {
+    var driver = getDriverOrThrow(driverId);
+
+    if (driver.getStatus() != DriverStatus.ON_DELIVERY) {
+      throw new IllegalStateException("Driver is not on a delivery");
+    }
+
+    UUID completedOrderId = driver.getCurrentOrderId();
+
+    driver.setStatus(DriverStatus.AVAILABLE);
+    driver.setCurrentOrderId(null);  // clear the order
+    var saved = driverRepository.save(driver);
+
+    // Free them in Redis - back into available set
+    locationService.markAvailable(driverId);
+
+    log.info("Driver {} completed delivery of order {} → AVAILABLE", driverId, completedOrderId);
+    driverEventProducer.publishOrderDelivered(completedOrderId, driverId);
     return saved;
   }
 }

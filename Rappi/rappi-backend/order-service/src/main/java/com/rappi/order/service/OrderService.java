@@ -98,4 +98,14 @@ public class OrderService {
 
   // Simple record to carry cart item data into this method
   public record CartItemInput(UUID menuItemId, int quantity, BigDecimal clientPrice) {}
+
+  @Transactional
+  public Order assignDriver(UUID orderId, UUID driverId) {
+    var order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new RuntimeException("Order not found: "+orderId));
+    order.setDriverId(driverId);
+    var saved = orderRepository.save(order);
+    log.info("Order {} assigned driver {}", orderId, driverId);
+    return saved;
+  }
 }

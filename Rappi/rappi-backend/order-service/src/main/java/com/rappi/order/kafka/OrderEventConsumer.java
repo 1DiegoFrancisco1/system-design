@@ -86,4 +86,37 @@ public class OrderEventConsumer {
       log.error("Failed to process order.rejected event: {}", message, e);
     }
   }
+
+  @KafkaListener(
+          topics = "driver.assigned",
+          groupId = "order-service-group"
+  )
+  public void onDriverAssigned(String message) {
+    try {
+      log.info("Received driver.assigned event: {}", message);
+
+      DriverAssignedEvent event = objectMapper.readValue(message, DriverAssignedEvent.class);
+
+      orderService.assignDriver(event.orderId(), event.driverId());
+      log.info("Order {} now has driver {}", event.orderId(), event.driverId());
+    } catch (Exception e) {
+      log.error("Failed to process driver.assigned event: {}", message, e);
+    }
+  }
+
+  @KafkaListener(
+          topics = "order.delivered",
+          groupId = "order-service-group"
+  )
+  public void onOrderDelivered(String message) {
+    try {
+      log.info("Received order.delivered event: {}", message);
+
+      DriverAssignedEvent event = objectMapper.readValue(message, DriverAssignedEvent.class);
+      orderService.updateStatus(event.orderId(), OrderStatus.DELIVERED);
+      log.info("Order {} marked DELIVERED", event.orderId());
+    } catch (Exception e) {
+      log.error("Failed to process order.delivered event: {}", message, e);
+    }
+  }
 }
