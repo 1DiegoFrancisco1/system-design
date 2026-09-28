@@ -122,4 +122,14 @@ public class DriverService {
     driverEventProducer.publishOrderDelivered(completedOrderId, driverId);
     return saved;
   }
+
+  @Transactional
+  public Driver releaseDriver(UUID driverId) {
+    var driver = getDriverOrThrow(driverId);
+    driver.setStatus(DriverStatus.AVAILABLE);
+    driver.setCurrentOrderId(null);
+    var saved = driverRepository.save(driver);
+    log.info("Driver {} released back to AVAILABLE (compensation)", driverId);
+    return saved;
+  }
 }

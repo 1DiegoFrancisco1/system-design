@@ -52,16 +52,28 @@ public class OrderEventConsumer {
         // Production: saga with compensation — release Redis claim if Postgres/Kafka fail.
         if (claimed) {
           UUID driverId = UUID.fromString(driverIdStr);
+          boolean persisted = false;
 
-          // 3. Assign in Postgres -> status ON_DELIVERY
-          driverService.assignToOrder(driverId, event.orderId());
-          // 4. Announce it
-          driverEventProducer.publishDriverAssigned(event.orderId(), driverId);
-
-          log.info("Order {} assigned to driver {}", event.orderId(), driverId);
-          return; // done - stop trying other candidates
+          try {
+            // Forward steps: persist assignment, then announce it
+            // Assign in Postgres -> status ON_DELIVERY
+            driverService.assignToOrder(driverId, event.orderId());
+            persisted = true;                       // Postgres committed
+            driverEventProducer.publishDriverAssigned(event.orderId(), driverId);
+            log.info("Order {} assigned to driver {}", event.orderId(), driverId);
+            return; // success — stop trying other candidates
+          } catch (Exception e) {
+            log.error("Assignment failed for driver {} on order {} — compensating (releasing claim)",
+                    driverId, event.orderId(), e);
+            // Compensate Postgres too, but ONLY if it was actually written
+            if (persisted) {
+              driverService.releaseDriver(driverId);   // status → AVAILABLE, clear currentOrderId
+            }
+            // Always release the Redis claim
+            locationService.markAvailable(driverId);
+            // fall through: try the next candidate driver
+          }
         }
-
         log.info("Driver {} was already taken, trying next...", driverIdStr);
       }
 
