@@ -1,0 +1,24 @@
+# ── Types: the shape of our data ──────────────────
+
+type Restaurant {
+    id: ID!
+    name: String!
+    address: String!
+    open: Boolean!
+    menu: [MenuItem!]!
+}
+
+type MenuItem {
+    id: ID!
+    name: String!
+    category: String!
+    price: Float!
+    available: Boolean!
+}
+
+# ── Queries: what the client can ASK for ──────────
+
+type Query {
+    restaurant(id: ID!): Restaurant
+    openRestaurants: [Restaurant!]!
+}

@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: graphql-gateway
+
+  graphql:
+    graphiql:
+      enabled: true
+
+server:
+  port: 8084
