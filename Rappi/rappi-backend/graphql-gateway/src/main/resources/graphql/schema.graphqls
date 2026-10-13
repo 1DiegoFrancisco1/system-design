@@ -22,3 +22,37 @@ type Query {
     restaurant(id: ID!): Restaurant
     openRestaurants: [Restaurant!]!
 }
+
+# ── Input types (data the client SENDS) ──────────
+
+input PlaceOrderInput {
+    customerId: ID!
+    restaurantId: ID!
+    deliveryAddress: String!
+    items: [CartItemInput!]!
+    idempotencyKey: String!
+}
+
+input CartItemInput {
+    menuItemId: ID!
+    quantity: Int!
+    clientPrice: Float!
+}
+
+# ── The Order type (what we return) ───────────────
+
+type Order {
+    id: ID!
+    customerId: ID!
+    restaurantId: ID!
+    driverId: ID
+    status: String!
+    total: Float!
+    deliveryAddress: String!
+}
+
+# ── Mutations (operations that CHANGE things) ─────
+
+type Mutation {
+    placeOrder(input: PlaceOrderInput!): Order!
+}

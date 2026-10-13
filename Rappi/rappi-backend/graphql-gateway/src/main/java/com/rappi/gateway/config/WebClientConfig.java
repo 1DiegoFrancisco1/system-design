@@ -13,4 +13,11 @@ public class WebClientConfig {
             .baseUrl("http://localhost:8082")   // your Restaurant Service
             .build();
   }
+
+  @Bean
+  WebClient orderServiceClient() {
+    return WebClient.builder()
+            .baseUrl("http://localhost:8081")
+            .build();
+  }
 }
